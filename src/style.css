@@ -1,20 +1,57 @@
-*
-{
+* {
     margin: 0;
     padding: 0;
 }
 
 html,
-body
-{
+body {
     height: 100vh;
-    font-family: 'Poppins';
+    font-family: "Poppins";
+    background-color: rgb(24, 24, 24);
+    color: white;
 }
 
-.webgl
-{
-    position: fixed;
+.webgl {
+    position: absolute;
+    width: 100vw;
     top: 0;
-    left: 0;
+    right: 0;
     outline: none;
+    mix-blend-mode: normal;
+}
+
+p {
+    font-size: 1.5rem;
+}
+
+.container {
+    margin-left: 1rem;
+    /* width: 50vw; */
+    /* height: 200vh; */
+    position: absolute;
+    display: grid;
+    grid-gap: 10px;
+    place-items: top;
+}
+
+h1 {
+    font-size: 8rem;
+    text-transform: uppercase;
+    color: white;
+}
+
+h2 {
+    margin-bottom: 2rem;
+}
+
+section {
+    height: 100vh;
+}
+
+#scrollProgress {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 99;
+    font-size: 3vh;
 }
