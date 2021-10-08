@@ -6,7 +6,8 @@
 html,
 body {
     height: 100vh;
-    font-family: "Poppins";
+
+    font-family: "Raleway";
     background-color: rgb(24, 24, 24);
     color: white;
 }
@@ -17,41 +18,44 @@ body {
     top: 0;
     right: 0;
     outline: none;
-    mix-blend-mode: normal;
-}
-
-p {
-    font-size: 1.5rem;
 }
 
 .container {
-    margin-left: 1rem;
-    /* width: 50vw; */
-    /* height: 200vh; */
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
     position: absolute;
     display: grid;
-    grid-gap: 10px;
-    place-items: top;
+    align-items: top;
+}
+
+.content {
+    display: flex;
+    width: 100%;
+    position: relative;
+    flex-direction: column;
+}
+
+.cotent:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-bottom: 1px solid white;
+    transform: scaleX(1);
 }
 
 h1 {
     font-size: 8rem;
-    text-transform: uppercase;
+    font-weight: lighter;
     color: white;
+    pointer-events: none;
 }
 
 h2 {
-    margin-bottom: 2rem;
-}
-
-section {
-    height: 100vh;
-}
-
-#scrollProgress {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 99;
-    font-size: 3vh;
+    font-size: 3rem;
+    font-weight: lighter;
+    pointer-events: none;
 }

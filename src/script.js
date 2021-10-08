@@ -3,25 +3,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "dat.gui";
 import { Interaction } from "three.interaction-fixed";
+import gsap from "gsap";
 
 // Loading
 
 const textureLoader = new THREE.TextureLoader();
 const normalTexture = textureLoader.load("/textures/NormalMap.png");
-
-let scrollPercent = 0;
-
-document.body.onscroll = () => {
-    //calculate the current scroll progress as a percentage
-    scrollPercent =
-        ((document.documentElement.scrollTop || document.body.scrollTop) /
-            ((document.documentElement.scrollHeight ||
-                document.body.scrollHeight) -
-                document.documentElement.clientHeight)) *
-        100;
-    document.getElementById("scrollProgress").innerText =
-        "Scroll Progress : " + scrollPercent.toFixed(2);
-};
 
 // Debug
 const gui = new dat.GUI();
@@ -32,8 +19,9 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-const geometry = new THREE.PlaneBufferGeometry(1.2, 1.2);
+// Geometry
 
+const geometry = new THREE.PlaneBufferGeometry(1.2, 1.2);
 //looping inside objects
 for (let i = 0; i < 5; i++) {
     const material = new THREE.MeshBasicMaterial({
@@ -53,13 +41,40 @@ scene.traverse((object) => {
     }
 });
 
+// Particles
+
+const particlesGeometry = new THREE.BufferGeometry();
+// general shape constructor
+const particlesCount = 10000;
+// the number of particles
+const posArr = new Float32Array(particlesCount * 3);
+// provide us with XYZ co-ordinates for each particle.
+// xyz xyz xyz xyz
+
+for (let i = 0; i < particlesCount * 3; i++) {
+    // spreading out the particles over a given area
+    posArr[i] = (Math.random() - 0.5) * 30;
+}
+
+particlesGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(posArr, 3)
+    // assigning the random xyz attributes to each particles
+);
+
 // Materials
+
+const material = new THREE.PointsMaterial({ size: 0.005 });
 
 // Mesh
 
+const particlesMesh = new THREE.Points(particlesGeometry, material);
+scene.add(particlesMesh);
+particlesMesh.position.set(0, -8, 0);
 // Lights
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 6);
+scene.add(ambientLight);
 
 const pointLight = new THREE.PointLight(0xffffff, 0.1);
 pointLight.position.x = 2;
@@ -87,13 +102,13 @@ light2.add(pointLight2.position, "y").min(-3).max(3).step(0.01);
 light2.add(pointLight2.position, "z").min(-3).max(3).step(0.01);
 light2.add(pointLight2, "intensity").min(1).max(10).step(0.01);
 
-const pointLightHelper = new THREE.PointLightHelper(pointLight2, 1);
+// const pointLightHelper = new THREE.PointLightHelper(pointLight2, 1);
 
 light2.addColor(light2Color, "color").onChange(() => {
     pointLight2.color.set(light2Color.color);
 });
 
-scene.add(pointLightHelper);
+// scene.add(pointLightHelper);
 // LIGHT 3
 
 const pointLight3 = new THREE.PointLight(0xffffff, 2);
@@ -120,8 +135,8 @@ light3.addColor(light3Color, "color").onChange(() => {
     pointLight3.color.set(light3Color.color);
 });
 
-const pointLightHelper2 = new THREE.PointLightHelper(pointLight3, 1);
-scene.add(pointLightHelper2);
+// const pointLightHelper2 = new THREE.PointLightHelper(pointLight3, 1);
+// scene.add(pointLightHelper2);
 
 /**
  * Sizes
@@ -172,14 +187,19 @@ window.addEventListener("wheel", onMouseWheel);
 let y = 0;
 let pos = 0;
 
-const mouse = new THREE.Vector2();
-
-window.addEventListener;
-
 function onMouseWheel(e) {
     y = e.deltaY * 0.003;
-    // get the Y position for each movement of the scrollwheel
+    particlesMesh.rotation.y += 0.0005;
 }
+
+const mouse = new THREE.Vector2();
+
+window.addEventListener("mousemove", (e) => {
+    // This comes from Bruno Simon's course
+    // It will give us a value from -1 to 1
+    mouse.x = (e.clientX / sizes.width) * 2 - 1;
+    mouse.y = -(e.clientY / sizes.height) * 2 + 1;
+});
 
 // Controls;
 // const controls = new OrbitControls(camera, canvas);
@@ -212,22 +232,41 @@ const clock = new THREE.Clock();
 const tick = () => {
     // Update Orbital Controls
     // controls.update()
-    const elapsedTime = clock.getElapsedTime();
-
+    // const elapsedTime = clock.getElapsedTime();
+    particlesMesh.rotation.y += 0.0005;
     // Raycaster
 
     raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(objs);
+
+    for (const intersect of intersects) {
+        // when mouseOver
+
+        let obj = intersect.object;
+        gsap.to(obj.scale, { x: 1.2, y: 1.2 });
+        gsap.to(obj.rotation, { y: -0.2 });
+        gsap.to(obj.position, { z: 0.2 });
+    }
+
+    for (const object of objs) {
+        // mouseOut
+
+        if (!intersects.find((intersect) => intersect.object == object)) {
+            gsap.to(object.scale, { x: 1, y: 1 });
+            gsap.to(object.rotation, { y: 0 });
+            gsap.to(object.position, { z: 0 });
+        }
+    }
 
     // Scroll
-
     pos += y;
-    y *= 0.8;
-    camera.position.y = pos;
+    y *= 0.9;
+    camera.position.y = -pos;
 
     // Render
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(tick);
 };
-window.scrollTo({ top: 0, behavior: "smooth" });
+
 tick();
